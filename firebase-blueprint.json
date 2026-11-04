@@ -1,0 +1,92 @@
+{
+  "entities": {
+    "Tournament": {
+      "title": "Tournament",
+      "description": "Free Fire tournament information including mode, prize pool, room credentials and participant roster.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 150 },
+        "gameMode": { "type": "string", "enum": ["BR", "CS", "LONE_WOLF"] },
+        "format": { "type": "string", "enum": ["Solo", "Duo", "Squad", "1v1", "2v2", "4v4"] },
+        "map": { "type": "string", "maxLength": 80 },
+        "image": { "type": "string", "maxLength": 500 },
+        "entryFee": { "type": "number" },
+        "prizePool": { "type": "number" },
+        "perKill": { "type": "number" },
+        "totalSlots": { "type": "number" },
+        "joinedSlots": { "type": "number" },
+        "startTime": { "type": "string", "maxLength": 60 },
+        "startTimestamp": { "type": "number" },
+        "status": { "type": "string", "enum": ["upcoming", "live", "completed", "cancelled"] },
+        "version": { "type": "string", "maxLength": 100 },
+        "roomId": { "type": "string", "maxLength": 40 },
+        "roomPassword": { "type": "string", "maxLength": 40 },
+        "winnerAnnounced": { "type": "boolean" },
+        "winnerTeam": { "type": "string", "maxLength": 100 }
+      },
+      "required": ["title", "gameMode", "format", "map", "entryFee", "prizePool", "totalSlots", "status"]
+    },
+    "DepositRequest": {
+      "title": "DepositRequest",
+      "description": "Player UPI deposit request with UTR reference number for wallet top-up.",
+      "type": "object",
+      "properties": {
+        "userName": { "type": "string", "maxLength": 80 },
+        "userPhone": { "type": "string", "maxLength": 20 },
+        "userUid": { "type": "string", "maxLength": 40 },
+        "amount": { "type": "number" },
+        "utrNumber": { "type": "string", "maxLength": 30 },
+        "upiApp": { "type": "string", "maxLength": 40 },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "submittedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["userName", "amount", "utrNumber", "status"]
+    },
+    "WithdrawalRequest": {
+      "title": "WithdrawalRequest",
+      "description": "Player payout withdrawal request to UPI ID.",
+      "type": "object",
+      "properties": {
+        "userName": { "type": "string", "maxLength": 80 },
+        "userPhone": { "type": "string", "maxLength": 20 },
+        "upiId": { "type": "string", "maxLength": 80 },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "requestedAt": { "type": "string", "maxLength": 50 }
+      },
+      "required": ["userName", "upiId", "amount", "status"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Player account profile and wallet data.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 128 },
+        "ign": { "type": "string", "maxLength": 60 },
+        "freeFireUid": { "type": "string", "maxLength": 30 },
+        "phone": { "type": "string", "maxLength": 25 },
+        "walletBalance": { "type": "number" }
+      },
+      "required": ["uid", "walletBalance"]
+    }
+  },
+  "firestore": {
+    "/tournaments/{tournamentId}": {
+      "schema": { "$ref": "Tournament" },
+      "description": "Collection of Free Fire tournaments and registered participants."
+    },
+    "/deposit_requests/{depositId}": {
+      "schema": { "$ref": "DepositRequest" },
+      "description": "Submitted UPI deposits awaiting admin UTR verification."
+    },
+    "/withdrawal_requests/{withdrawalId}": {
+      "schema": { "$ref": "WithdrawalRequest" },
+      "description": "Player payout withdrawal requests."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "UserProfile" },
+      "description": "User account and wallet balance."
+    }
+  }
+}

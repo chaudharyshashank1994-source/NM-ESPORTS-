@@ -1,0 +1,6 @@
+{
+  "name": "NM ESPORTS - Free Fire Tournaments",
+  "description": "Premier Free Fire competitive esports tournament platform for Battle Royale, Clash Squad, and Lone Wolf with wallet payment system, live room credentials, and admin control.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
