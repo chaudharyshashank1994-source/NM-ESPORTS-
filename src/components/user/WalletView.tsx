@@ -23,6 +23,7 @@ export const WalletView: React.FC = () => {
     submitDepositRequest,
     submitWithdrawalRequest,
     profile,
+    setShowUserAuthModal,
   } = useEsports();
 
   const [activeTab, setActiveTab] = useState<'add' | 'withdraw' | 'history'>('add');
@@ -65,6 +66,12 @@ export const WalletView: React.FC = () => {
 
   const handleDepositSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!profile.isLoggedIn) {
+      alert('Please create or sign in to your player account before depositing funds.');
+      setShowUserAuthModal(true);
+      return;
+    }
+
     if (!utrNumber.trim() || utrNumber.length < 8) {
       alert('Please enter a valid 12-digit UPI UTR / Transaction Reference number.');
       return;
@@ -87,6 +94,12 @@ export const WalletView: React.FC = () => {
 
   const handleWithdrawSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!profile.isLoggedIn) {
+      setWithdrawStatus({ type: 'error', message: 'Please sign in to withdraw funds' });
+      setShowUserAuthModal(true);
+      return;
+    }
+
     const amt = parseInt(withdrawAmount, 10);
     if (isNaN(amt) || amt < 50) {
       setWithdrawStatus({ type: 'error', message: 'Minimum withdrawal amount is ₹50' });
@@ -129,7 +142,7 @@ export const WalletView: React.FC = () => {
               {formatCurrency(walletBalance)}
             </div>
             <div className="text-xs text-neutral-400 mt-2 flex items-center gap-2">
-              <span>Account: {profile.ign}</span>
+              <span>Account: {profile.isLoggedIn ? (profile.ign || profile.name) : 'Guest Player'}</span>
               <span aria-hidden="true">·</span>
               <span className="text-emerald-400 flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5" />

@@ -17,7 +17,7 @@ export const TournamentDetailsModal: React.FC<TournamentDetailsModalProps> = ({
   onJoinClick,
   onViewRoomClick,
 }) => {
-  const { profile } = useEsports();
+  const { profile, setShowUserAuthModal } = useEsports();
 
   if (!tournament) return null;
 
@@ -60,115 +60,72 @@ export const TournamentDetailsModal: React.FC<TournamentDetailsModalProps> = ({
           {/* Key Stats Row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
             <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800">
-              <span className="text-[11px] text-neutral-400">Total Prize Pool</span>
+              <span className="text-[11px] text-neutral-400 block truncate" title={tournament.prizePoolLabel || 'Total Prize Pool'}>
+                {tournament.prizePoolLabel || 'Total Prize Pool'}
+              </span>
               <div className="text-lg font-black text-amber-400 font-mono tabular-nums">
                 {formatCurrency(tournament.prizePool)}
               </div>
             </div>
             <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800">
-              <span className="text-[11px] text-neutral-400">Entry Fee</span>
+              <span className="text-[11px] text-neutral-400 block truncate" title={tournament.entryFeeLabel || 'Entry Fee'}>
+                {tournament.entryFeeLabel || 'Entry Fee'}
+              </span>
               <div className="text-lg font-black text-emerald-400 font-mono tabular-nums">
-                {formatCurrency(tournament.entryFee)}
+                {tournament.entryFee === 0 ? 'FREE' : formatCurrency(tournament.entryFee)}
               </div>
             </div>
             <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800">
-              <span className="text-[11px] text-neutral-400">Per Kill Bounty</span>
+              <span className="text-[11px] text-neutral-400 block truncate" title={tournament.perKillLabel || 'Per Kill'}>
+                {tournament.perKillLabel || 'Per Kill'}
+              </span>
               <div className="text-lg font-black text-neutral-200 font-mono tabular-nums">
-                {tournament.perKill > 0 ? formatCurrency(tournament.perKill) : 'None'}
+                {tournament.showPerKill === false ? (
+                  <span className="text-neutral-500 text-sm">Off</span>
+                ) : tournament.perKill > 0 ? (
+                  tournament.perKill >= 5 ? formatCurrency(tournament.perKill) : `${tournament.perKill} Pt`
+                ) : (
+                  'None'
+                )}
               </div>
             </div>
             <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800">
-              <span className="text-[11px] text-neutral-400">Slots Filled</span>
+              <span className="text-[11px] text-neutral-400 block truncate" title={tournament.totalSlotsLabel || 'Slots Filled'}>
+                {tournament.totalSlotsLabel || 'Slots Filled'}
+              </span>
               <div className="text-lg font-black text-neutral-200 font-mono tabular-nums">
                 {tournament.joinedSlots} / {tournament.totalSlots}
               </div>
             </div>
           </div>
 
-          {/* Special Diwali Dhamaka Tournament Stages & Format */}
-          {tournament.diwaliFormat && (
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-neutral-950 border-2 border-amber-500/60 shadow-lg space-y-4">
+          {/* Match Flow & Detailed Rules Written by Admin */}
+          {tournament.description && (
+            <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-neutral-950 border-2 border-amber-500/60 shadow-lg space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">🪔</span>
+                  <span className="text-xl">⚡</span>
                   <div>
                     <h3 className="text-sm font-black text-white tracking-wide uppercase">
-                      Diwali Dhamaka Official 3-Stage Format
+                      Match Format & Progression
                     </h3>
                     <p className="text-[11px] text-amber-300">
-                      Starts 7th November at 02:00 PM IST · Total 48 Players (12 Squads)
+                      Official match instructions set by organizer
                     </p>
                   </div>
                 </div>
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-amber-500 text-neutral-950">
-                  Special Rules
-                </span>
-              </div>
-
-              {/* Stage 1: 2 BR Matches & Point System */}
-              <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800 space-y-2">
-                <div className="flex items-center justify-between text-xs font-bold text-white">
-                  <span className="flex items-center gap-1.5 text-amber-400">
-                    <Trophy className="w-3.5 h-3.5" />
-                    <span>Stage 1: 2 Battle Royale (BR) Qualifier Matches</span>
+                {tournament.specialBadge && (
+                  <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-amber-500 text-neutral-950">
+                    {tournament.specialBadge}
                   </span>
-                  <span className="text-neutral-400 font-mono text-[11px]">12 Squads &rarr; Top 4 Advance</span>
-                </div>
-                <p className="text-xs text-neutral-300 leading-relaxed">
-                  All 12 squads (48 players) play <strong className="text-white">2 BR Matches</strong> back-to-back (Bermuda & Purgatory). Total cumulative points from both matches determine the top 4 qualifying squads:
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs pt-1">
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800">
-                    <div className="text-[10px] text-neutral-400">Booyah (1st)</div>
-                    <div className="text-amber-400 font-black font-mono">+20 Pts</div>
-                  </div>
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800">
-                    <div className="text-[10px] text-neutral-400">2nd Place</div>
-                    <div className="text-neutral-200 font-black font-mono">+10 Pts</div>
-                  </div>
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800">
-                    <div className="text-[10px] text-neutral-400">3rd Place</div>
-                    <div className="text-neutral-300 font-black font-mono">+5 Pts</div>
-                  </div>
-                  <div className="p-2 rounded-lg bg-neutral-900 border border-neutral-800">
-                    <div className="text-[10px] text-neutral-400">Every 1 Kill</div>
-                    <div className="text-emerald-400 font-black font-mono">+1 Pt / Kill</div>
-                  </div>
-                </div>
+                )}
               </div>
-
-              {/* Stage 2 & 3: Clash Squad Knockout Bracket */}
-              <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800 space-y-2.5">
-                <div className="text-xs font-bold text-blue-400 flex items-center gap-1.5">
-                  <Swords className="w-3.5 h-3.5" />
-                  <span>Stage 2 & 3: Clash Squad (CS 4v4) Playoffs Bracket</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div className="p-2.5 rounded-lg bg-neutral-900 border border-neutral-800">
-                    <div className="text-[10px] text-amber-400 font-bold uppercase">Semi-Final 1</div>
-                    <div className="font-bold text-white mt-0.5">Rank #1 Squad vs Rank #3 Squad</div>
-                    <div className="text-[10px] text-neutral-400">Best of 13 rounds Clash Squad</div>
-                  </div>
-                  <div className="p-2.5 rounded-lg bg-neutral-900 border border-neutral-800">
-                    <div className="text-[10px] text-amber-400 font-bold uppercase">Semi-Final 2</div>
-                    <div className="font-bold text-white mt-0.5">Rank #2 Squad vs Rank #4 Squad</div>
-                    <div className="text-[10px] text-neutral-400">Best of 13 rounds Clash Squad</div>
-                  </div>
-                </div>
-                <div className="p-2.5 rounded-lg bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-xs flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-black text-amber-400 uppercase tracking-wider block">
-                      Stage 3: Grand Finale
-                    </span>
-                    <span className="font-bold text-white">Winner of SF1 vs Winner of SF2</span>
-                  </div>
-                  <span className="text-xs font-black font-mono text-amber-300">
-                    Diwali Trophy & ₹650 1st Prize
-                  </span>
-                </div>
+              <div className="p-3.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-xs text-neutral-200 leading-relaxed whitespace-pre-line">
+                {tournament.description}
               </div>
             </div>
           )}
+
 
           {/* Winner announcement if completed */}
           {tournament.winnerAnnounced && (
@@ -300,7 +257,11 @@ export const TournamentDetailsModal: React.FC<TournamentDetailsModalProps> = ({
               <button
                 onClick={() => {
                   onClose();
-                  onJoinClick(tournament);
+                  if (!profile.isLoggedIn) {
+                    setShowUserAuthModal(true);
+                  } else {
+                    onJoinClick(tournament);
+                  }
                 }}
                 className="px-5 py-2.5 text-xs font-black uppercase rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 transition-colors shadow-sm"
               >

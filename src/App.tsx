@@ -10,8 +10,13 @@ import { WalletView } from './components/user/WalletView';
 import { MyMatchesView } from './components/user/MyMatchesView';
 import { LeaderboardView } from './components/user/LeaderboardView';
 import { RulesView } from './components/user/RulesView';
+import { ProfileView } from './components/user/ProfileView';
+import { EsportsLogo } from './components/common/EsportsLogo';
 import { AdminPanel } from './components/admin/AdminPanel';
 import { AdminLoginModal } from './components/admin/AdminLoginModal';
+import { UserAuthModal } from './components/user/UserAuthModal';
+import { LoginGateView } from './components/user/LoginGateView';
+import { MobileBottomNav } from './components/common/MobileBottomNav';
 import { Tournament, GameMode } from './types';
 import { Trophy, Swords, Zap, RefreshCw, Lock } from 'lucide-react';
 
@@ -20,13 +25,20 @@ const EsportsMain: React.FC = () => {
     currentPanel,
     isAdminLoggedIn,
     setShowAdminLoginModal,
+    showUserAuthModal,
+    setShowUserAuthModal,
     userActiveTab,
     setUserActiveTab,
     tournaments,
     selectedMode,
     setSelectedMode,
     resetToDefaults,
+    profile,
   } = useEsports();
+
+  const [guestMode, setGuestMode] = useState<boolean>(() => {
+    return sessionStorage.getItem('nm_guest_mode') === 'true';
+  });
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'upcoming' | 'live' | 'completed'>('all');
 
@@ -54,9 +66,16 @@ const EsportsMain: React.FC = () => {
       <Navbar />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 sm:py-8 pb-24 lg:pb-8">
         {currentPanel === 'admin' && isAdminLoggedIn ? (
           <AdminPanel />
+        ) : !profile.isLoggedIn && !guestMode ? (
+          <LoginGateView
+            onContinueAsGuest={() => {
+              setGuestMode(true);
+              sessionStorage.setItem('nm_guest_mode', 'true');
+            }}
+          />
         ) : (
           <>
             {userActiveTab === 'tournaments' && (
@@ -138,10 +157,16 @@ const EsportsMain: React.FC = () => {
                 {/* Tournaments Grid */}
                 {filteredTournaments.length === 0 ? (
                   <div className="p-12 text-center rounded-2xl bg-neutral-900 border border-neutral-800">
-                    <Trophy className="w-8 h-8 text-neutral-500 mx-auto mb-2" />
-                    <div className="text-base font-bold text-white">No Tournaments Found</div>
-                    <p className="text-xs text-neutral-400 mt-1">
-                      Try selecting a different mode or status filter.
+                    <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
+                      <Trophy className="w-7 h-7" />
+                    </div>
+                    <div className="text-base font-bold text-white mb-1">
+                      {tournaments.length === 0 ? 'No Matches Live Right Now' : 'No Tournaments Found'}
+                    </div>
+                    <p className="text-xs text-neutral-400 max-w-md mx-auto">
+                      {tournaments.length === 0
+                        ? 'Organizer (NM ESPORTS) will publish upcoming Free Fire matches shortly. Check back soon or stay tuned!'
+                        : 'Try selecting a different game mode or status filter.'}
                     </p>
                   </div>
                 ) : (
@@ -172,12 +197,20 @@ const EsportsMain: React.FC = () => {
             {userActiveTab === 'leaderboard' && <LeaderboardView />}
 
             {userActiveTab === 'rules' && <RulesView />}
+
+            {userActiveTab === 'profile' && <ProfileView />}
           </>
         )}
       </main>
 
       {/* Admin Password Login Modal Gate */}
       <AdminLoginModal />
+
+      {/* Player Account Auth Modal */}
+      <UserAuthModal
+        isOpen={showUserAuthModal}
+        onClose={() => setShowUserAuthModal(false)}
+      />
 
       {/* User Modals */}
       {selectedForJoin && (
@@ -209,18 +242,50 @@ const EsportsMain: React.FC = () => {
         />
       )}
 
+      {/* Mobile Fixed Bottom Navigation */}
+      <MobileBottomNav />
+
       {/* Clean User Footer (Zero admin clutter for regular players) */}
-      <footer className="mt-auto border-t border-neutral-900 bg-neutral-950/80 py-8 text-neutral-400 text-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white">NM ESPORTS</span>
-            <span aria-hidden="true">·</span>
-            <span>Premier Free Fire Tournament Platform</span>
-            <span aria-hidden="true">·</span>
-            <span>&copy; {new Date().getFullYear()}</span>
+      <footer className="mt-auto border-t border-neutral-900 bg-neutral-950/90 py-8 text-neutral-400 text-xs">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-5">
+          <div className="flex items-center gap-3">
+            <EsportsLogo size="xs" showText={false} />
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <span className="font-bold text-white tracking-wide">NM ESPORTS</span>
+              <span className="hidden sm:inline" aria-hidden="true">·</span>
+              <span className="text-neutral-400">Premier Free Fire Tournament Platform</span>
+              <span className="hidden sm:inline" aria-hidden="true">·</span>
+              <span className="text-neutral-500">&copy; {new Date().getFullYear()}</span>
+            </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <a
+              href="https://whatsapp.com/channel/0029VbDxPZ23rZZVZ1LydS3z"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#25D366] hover:underline font-bold flex items-center gap-1.5 transition-colors"
+            >
+              <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.96.523 1.838.796 2.791.796h.005c3.18 0 5.767-2.586 5.767-5.766.001-3.182-2.585-5.782-5.772-5.782zm0-1.84c4.195 0 7.604 3.409 7.605 7.606 0 4.197-3.41 7.607-7.605 7.607-1.282 0-2.527-.323-3.626-.935L4.05 20.003l1.402-4.227C4.78 14.65 4.425 13.38 4.425 11.938c.001-4.197 3.411-7.606 7.606-7.606z" />
+              </svg>
+              <span>WhatsApp Channel</span>
+            </a>
+            <span aria-hidden="true">·</span>
+            <button
+              onClick={() => setUserActiveTab('profile')}
+              className="hover:text-white transition-colors"
+            >
+              My ID Pass
+            </button>
+            <span aria-hidden="true">·</span>
+            <button
+              onClick={() => setUserActiveTab('rules')}
+              className="hover:text-white transition-colors"
+            >
+              Terms & Fair Play
+            </button>
+            <span aria-hidden="true">·</span>
             <button
               onClick={() => {
                 if (confirm('Reset sample tournaments, wallet funds, and test data to default?')) {
@@ -231,13 +296,6 @@ const EsportsMain: React.FC = () => {
             >
               <RefreshCw className="w-3 h-3" />
               <span>Reset Data</span>
-            </button>
-            <span aria-hidden="true">·</span>
-            <button
-              onClick={() => setUserActiveTab('rules')}
-              className="hover:text-white transition-colors"
-            >
-              Terms & Fair Play
             </button>
             <span aria-hidden="true">·</span>
             {/* Discreet Organizer Lock trigger */}

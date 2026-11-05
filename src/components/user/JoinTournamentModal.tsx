@@ -32,9 +32,9 @@ export const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({
     tournament?.format === 'Duo' || tournament?.format === '2v2' ? 1 : tournament?.format === 'Squad' || tournament?.format === '4v4' ? 3 : 0;
 
   const [teammates, setTeammates] = useState<Array<{ ign: string; uid: string }>>(() => {
-    return Array.from({ length: teammateCount }, (_, i) => ({
-      ign: `Teammate_${i + 2}`,
-      uid: `29481900${i + 2}`,
+    return Array.from({ length: teammateCount }, () => ({
+      ign: '',
+      uid: '',
     }));
   });
 
@@ -70,8 +70,18 @@ export const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({
       return;
     }
 
+    // Teammates validation for Duo/Squad
+    if (requiresTeammates) {
+      for (let i = 0; i < teammates.length; i++) {
+        if (!teammates[i].ign.trim() || !teammates[i].uid.trim()) {
+          setErrorMsg(`Please enter your friend's In-Game Name (IGN) and Free Fire UID for Teammate #${i + 2}.`);
+          return;
+        }
+      }
+    }
+
     if (!hasEnoughFunds) {
-      setErrorMsg(`Insufficient wallet balance. You need ₹${tournament.entryFee - walletBalance} more to join.`);
+      setErrorMsg(`Insufficient wallet balance (₹${walletBalance}). You need ₹${tournament.entryFee - walletBalance} more to join. Please add cash via UPI.`);
       return;
     }
 
@@ -208,31 +218,46 @@ export const JoinTournamentModal: React.FC<JoinTournamentModalProps> = ({
 
           {/* Teammates fields if Squad/Duo */}
           {requiresTeammates && teammates.length > 0 && (
-            <div className="pt-2 border-t border-neutral-800">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-300 mb-2">
-                <Users className="w-3.5 h-3.5 text-amber-400" />
-                <span>Teammates Information ({teammates.length} Players)</span>
+            <div className="pt-2 border-t border-neutral-800 space-y-2">
+              <div className="flex items-center justify-between text-xs font-semibold text-neutral-300">
+                <span className="flex items-center gap-1.5 text-amber-400">
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Teammates Squad Details ({teammates.length} Friends Required)</span>
+                </span>
+                <span className="text-[10px] text-neutral-400">All UID must be valid</span>
               </div>
-              <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+              <p className="text-[11px] text-amber-300/90 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">
+                Please enter your friend name and Free Fire ID/UID for each squad member below:
+              </p>
+              <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
                 {teammates.map((tm, idx) => (
-                  <div key={idx} className="grid grid-cols-2 gap-2 p-2 rounded-lg bg-neutral-950/60 border border-neutral-800/80">
-                    <div>
-                      <input
-                        type="text"
-                        value={tm.ign}
-                        onChange={(e) => handleTeammateChange(idx, 'ign', e.target.value)}
-                        placeholder={`Player ${idx + 2} IGN`}
-                        className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 focus:border-amber-500"
-                      />
+                  <div key={idx} className="p-2.5 rounded-xl bg-neutral-950/80 border border-neutral-800 space-y-1.5">
+                    <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                      Friend / Teammate #{idx + 2}
                     </div>
-                    <div>
-                      <input
-                        type="text"
-                        value={tm.uid}
-                        onChange={(e) => handleTeammateChange(idx, 'uid', e.target.value)}
-                        placeholder={`Player ${idx + 2} UID`}
-                        className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-500 font-mono focus:border-amber-500"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] text-neutral-400 mb-0.5">Friend's Free Fire IGN</label>
+                        <input
+                          type="text"
+                          required
+                          value={tm.ign}
+                          onChange={(e) => handleTeammateChange(idx, 'ign', e.target.value)}
+                          placeholder={`Friend ${idx + 2} Free Fire Name`}
+                          className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-600 focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] text-neutral-400 mb-0.5">Friend's Free Fire UID</label>
+                        <input
+                          type="text"
+                          required
+                          value={tm.uid}
+                          onChange={(e) => handleTeammateChange(idx, 'uid', e.target.value)}
+                          placeholder={`Friend ${idx + 2} Free Fire UID`}
+                          className="w-full px-2.5 py-1.5 text-xs rounded-lg bg-neutral-900 border border-neutral-800 text-white placeholder-neutral-600 font-mono focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
                     </div>
                   </div>
                 ))}

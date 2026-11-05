@@ -17,10 +17,10 @@ export const TournamentCard: React.FC<TournamentCardProps> = ({
   onViewRoomClick,
   onViewDetailsClick,
 }) => {
-  const { profile } = useEsports();
+  const { profile, setShowUserAuthModal } = useEsports();
 
   const isUserJoined = tournament.participants.some(
-    (p) => p.playerUid === profile.uid || p.playerIgn.toLowerCase() === profile.ign.toLowerCase()
+    (p) => p.playerUid === profile.uid || (profile.ign && p.playerIgn.toLowerCase() === profile.ign.toLowerCase())
   );
 
   const isFull = tournament.joinedSlots >= tournament.totalSlots;
@@ -60,16 +60,18 @@ export const TournamentCard: React.FC<TournamentCardProps> = ({
           : 'bg-neutral-900/90 border border-neutral-800 hover:border-neutral-700'
       }`}
     >
-      {/* Featured Banner Top Ribbon if Diwali */}
+      {/* Featured Banner Top Ribbon */}
       {tournament.specialBadge && (
         <div className="bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-neutral-950 px-4 py-1.5 text-xs font-black uppercase tracking-wider flex items-center justify-between shadow-md">
           <span className="flex items-center gap-1.5">
-            <span>🪔</span>
+            <span>✨</span>
             <span>{tournament.specialBadge}</span>
           </span>
-          <span className="text-[11px] font-bold text-neutral-900 bg-white/20 px-2 py-0.5 rounded">
-            2 BR + CS Playoffs
-          </span>
+          {tournament.subtitle && (
+            <span className="text-[11px] font-bold text-neutral-900 bg-white/20 px-2 py-0.5 rounded truncate max-w-[180px]">
+              {tournament.subtitle}
+            </span>
+          )}
         </div>
       )}
 
@@ -131,14 +133,21 @@ export const TournamentCard: React.FC<TournamentCardProps> = ({
       {/* Card Body */}
       <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between">
         <div>
-          {/* Title */}
-          <h3 className="text-base sm:text-lg font-bold text-white tracking-tight mb-1.5 group-hover:text-amber-400 transition-colors line-clamp-1">
+          {/* Title & Subtitle */}
+          <h3 className="text-base sm:text-lg font-bold text-white tracking-tight mb-1 group-hover:text-amber-400 transition-colors line-clamp-1">
             {tournament.title}
           </h3>
 
-          {tournament.diwaliFormat ? (
-            <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-[11px] text-amber-300 mb-4 font-medium">
-              ⚡ <strong>2 BR Matches (20/10/5 pts)</strong> &rarr; Top 4 Squads to CS Semis (1v3 & 2v4) &rarr; Final!
+          {tournament.subtitle && (
+            <p className="text-xs text-amber-300 font-medium mb-2.5 line-clamp-1">
+              {tournament.subtitle}
+            </p>
+          )}
+
+          {/* Description snippet or version */}
+          {tournament.description ? (
+            <div className="p-2.5 rounded-lg bg-neutral-950/80 border border-neutral-800 text-[11px] text-neutral-300 mb-4 line-clamp-2 leading-relaxed">
+              ⚡ {tournament.description}
             </div>
           ) : (
             <div className="text-xs text-neutral-400 mb-4 flex items-center gap-2">
@@ -148,24 +157,36 @@ export const TournamentCard: React.FC<TournamentCardProps> = ({
             </div>
           )}
 
-          {/* Key Metrics: Prize Pool, Per Kill, Entry Fee */}
+          {/* Key Metrics: Custom labels for Prize Pool, Per Kill, Entry Fee */}
           <div className="grid grid-cols-3 gap-2 p-2.5 rounded-xl bg-neutral-950/70 border border-neutral-800/80 mb-4 text-center">
             <div>
-              <div className="text-[11px] font-medium text-neutral-400">Prize Pool</div>
+              <div className="text-[11px] font-medium text-neutral-400 truncate" title={tournament.prizePoolLabel || 'Prize Pool'}>
+                {tournament.prizePoolLabel || 'Prize Pool'}
+              </div>
               <div className="text-sm sm:text-base font-black text-amber-400 font-mono tabular-nums">
                 {formatCurrency(tournament.prizePool)}
               </div>
             </div>
 
             <div>
-              <div className="text-[11px] font-medium text-neutral-400">Per Kill</div>
+              <div className="text-[11px] font-medium text-neutral-400 truncate" title={tournament.perKillLabel || 'Per Kill'}>
+                {tournament.perKillLabel || 'Per Kill'}
+              </div>
               <div className="text-sm sm:text-base font-bold text-neutral-200 font-mono tabular-nums">
-                {tournament.perKill > 0 ? formatCurrency(tournament.perKill) : 'N/A'}
+                {tournament.showPerKill === false ? (
+                  <span className="text-neutral-500 text-xs">Off</span>
+                ) : tournament.perKill > 0 ? (
+                  tournament.perKill >= 5 ? formatCurrency(tournament.perKill) : `${tournament.perKill} Pt`
+                ) : (
+                  'N/A'
+                )}
               </div>
             </div>
 
             <div>
-              <div className="text-[11px] font-medium text-neutral-400">Entry Fee</div>
+              <div className="text-[11px] font-medium text-neutral-400 truncate" title={tournament.entryFeeLabel || 'Entry Fee'}>
+                {tournament.entryFeeLabel || 'Entry Fee'}
+              </div>
               <div className="text-sm sm:text-base font-bold text-emerald-400 font-mono tabular-nums">
                 {tournament.entryFee === 0 ? 'FREE' : formatCurrency(tournament.entryFee)}
               </div>
@@ -177,7 +198,7 @@ export const TournamentCard: React.FC<TournamentCardProps> = ({
             <div className="flex items-center justify-between text-xs mb-1.5 font-medium">
               <span className="text-neutral-400 flex items-center gap-1">
                 <Users className="w-3.5 h-3.5" />
-                Slots Filled
+                {tournament.totalSlotsLabel || 'Slots Filled'}
               </span>
               <span className="text-neutral-200 font-mono tabular-nums">
                 {tournament.joinedSlots} / {tournament.totalSlots}
@@ -228,7 +249,13 @@ export const TournamentCard: React.FC<TournamentCardProps> = ({
             </button>
           ) : (
             <button
-              onClick={() => onJoinClick(tournament)}
+              onClick={() => {
+                if (!profile.isLoggedIn) {
+                  setShowUserAuthModal(true);
+                } else {
+                  onJoinClick(tournament);
+                }
+              }}
               className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl bg-amber-500 hover:bg-amber-400 text-neutral-950 transition-colors shadow-sm"
             >
               <span>Join Match</span>

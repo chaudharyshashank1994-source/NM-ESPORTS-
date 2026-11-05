@@ -156,6 +156,22 @@ export const RoomCredentialsModal: React.FC<RoomCredentialsModalProps> = ({ tour
             <span>Do not share room credentials with non-registered players. Spectators are strictly banned.</span>
           </div>
 
+          {/* WhatsApp Channel Alert Banner */}
+          <a
+            href="https://whatsapp.com/channel/0029VbDxPZ23rZZVZ1LydS3z"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between p-3 rounded-xl bg-[#25D366]/10 hover:bg-[#25D366]/20 border border-[#25D366]/30 text-xs text-[#25D366] font-bold transition-colors"
+          >
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.96.523 1.838.796 2.791.796h.005c3.18 0 5.767-2.586 5.767-5.766.001-3.182-2.585-5.782-5.772-5.782zm0-1.84c4.195 0 7.604 3.409 7.605 7.606 0 4.197-3.41 7.607-7.605 7.607-1.282 0-2.527-.323-3.626-.935L4.05 20.003l1.402-4.227C4.78 14.65 4.425 13.38 4.425 11.938c.001-4.197 3.411-7.606 7.606-7.606z" />
+              </svg>
+              <span>Get Room Password instantly on WhatsApp Channel</span>
+            </div>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
+
           <button
             onClick={onClose}
             className="w-full py-2.5 rounded-xl font-semibold text-xs bg-neutral-800 hover:bg-neutral-700 text-neutral-200 transition-colors"
